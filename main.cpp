@@ -51,42 +51,55 @@ int main(){
             case 1 :
                 cout << endl;
                 DisplayList(head);
+                break;
             case 2 :
                 cout << endl;
                 TestFunction();
+                break;
             case 3 :
                 cout << endl;
                 TestFunction();
+                break;
             case 4 :
                 cout << endl;
                 TestFunction();
+                break;
             case 5 :
                 cout << endl;
                 TestFunction();
+                break;
             case 6 :
                 cout << endl;
                 TestFunction();
+                break;
             case 7 :
                 cout << endl;
                 TestFunction();
+                break;
             case 8 :
                 cout << endl;
                 TestFunction();
+                break;
             case 9 :
                 cout << endl;
                 TestFunction();
+                break;
             case 10 :
                 cout << endl;
                 TestFunction();
+                break;
             case 11 :
                 cout << endl;
                 TestFunction();
+                break;
             case 12 :
                 cout << endl;
                 TestFunction();
+                break;
             default :
                 cout << "Goodbye.";
-                return 1;
+                isrunning = false;
+                break;
         }
         cout << endl;
     }
@@ -164,8 +177,53 @@ void InitializeList(PersonPtr& head){
 void DisplayList(PersonPtr head){
 
     PersonPtr current = head;
+    PersonPtr future = NULL;
+    PersonPtr past = current;
+    PersonPtr temp = current;
+    bool first = true ;
 
-    while(current != NULL) { // better way to display data - not defined size
+    // Sorts the list into ascending order
+    while(temp != NULL) {
+
+        future = current->next;
+        first = true;
+        while(future != NULL) {
+            if(current->pSSN > future->pSSN) {
+                if(current == temp){
+                    temp = future ; // 1/2/3  so 1/3/2 it makes temp 3 in the 2 position
+                }
+                if(first == true){
+                    past = current->next; // move past up one position
+                    head = current->next; // set head to the top
+                    current->next = future->next; // current points ahead 2 1/2/3/4 to 1/3/2/4 -- 3 to 2
+                    future->next = current; // future points back one 3 to 2  ^^^^
+                    first = false; // only for head
+
+                }
+                else{
+                    past->next = future; //   1/2/4/3 so 2 points to 4
+                    past = future; // move past up one position for next loop
+                    current->next = future->next; // current points ahead two 1/2/4/3 so 2 points to 4
+                    future->next = current; //roll future forward for next loop
+
+                }
+            }
+            else{
+                past = current; // roll forward one if not swapped 1/2/3/4  2 position becomes 3
+                current = future; // roll forward one as well
+                first = false; // in case we dont swap 1/2
+            }
+            future = current->next; //
+        }
+        current = head;
+        temp = temp->next;
+    }
+
+    current = head;
+    cout << endl;
+
+    // Displays a list of persons of indefinite size
+    while(current != NULL){
         cout << current->pName << " | " << current->pSSN << " | "
              << current->gender << " | " << current->DOB << " | "
              << current->height << " | " << current->weight << " | "
