@@ -44,7 +44,7 @@ int main(){
     bool isrunning = true;
     int userin;
     while(isrunning == true){
-        cout << "Enter which menu item you would like(1, 2, 3...): ";
+        cout << "Enter which menu item you would like(1, 2, 3 || 0 to quit): ";
         cin >> userin;
 
         switch(userin){
