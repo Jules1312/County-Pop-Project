@@ -1,7 +1,3 @@
-// Group project
-// 4/28/2021
-// Github test
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -232,6 +228,7 @@ void DisplayList(PersonPtr head){
              << current->fSSN << " | "  << current->mSSN << " | " <<  endl;
         current = current->next;
     }
+    current = head;
 }
 
 float CalcBMI(float height, float weight){
