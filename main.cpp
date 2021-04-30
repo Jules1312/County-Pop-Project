@@ -33,7 +33,6 @@ void DisplayMenu();
 void InitializeList(PersonPtr&, string);
 void DisplayList(PersonPtr);
 void DisplayHighBMI(PersonPtr);
-void AddPersonsFromFile(string);
 float CalcBMI(float, float);
 
 int main(){
@@ -66,7 +65,7 @@ int main(){
                 break;
             case 4 :
                 cout << endl;
-                AddPersonsFromFile(filename);
+                TestFunction();
                 break;
             case 5 :
                 cout << endl;
