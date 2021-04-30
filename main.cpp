@@ -30,13 +30,17 @@ struct person{
 
 void TestFunction();
 void DisplayMenu();
-void InitializeList(PersonPtr&);
+void InitializeList(PersonPtr&, string);
 void DisplayList(PersonPtr);
+void DisplayHighBMI(PersonPtr);
+void AddPersonsFromFile(string);
+float CalcBMI(float, float);
 
 int main(){
 
     PersonPtr head;
-    InitializeList(head);
+    string filename = "county-pop.txt";
+    InitializeList(head, filename);
 
     cout << "County-Pop-Project" << endl << endl;
     DisplayMenu();
@@ -62,7 +66,7 @@ int main(){
                 break;
             case 4 :
                 cout << endl;
-                TestFunction();
+                AddPersonsFromFile(filename);
                 break;
             case 5 :
                 cout << endl;
@@ -74,7 +78,7 @@ int main(){
                 break;
             case 7 :
                 cout << endl;
-                TestFunction();
+                DisplayHighBMI(head);
                 break;
             case 8 :
                 cout << endl;
@@ -99,7 +103,6 @@ int main(){
             default :
                 cout << "Goodbye.";
                 isrunning = false;
-                break;
         }
         cout << endl;
     }
@@ -122,7 +125,7 @@ void DisplayMenu(){
     << "12. Find all uncles, aunts, cousins, nephews and nieces of a person (user supplies SSN of the person)" << endl;
 }
 
-void InitializeList(PersonPtr& head){
+void InitializeList(PersonPtr& head, string filename){
     /* This function initializes the list of
        residents from a file at the start of the program */
 
@@ -133,7 +136,7 @@ void InitializeList(PersonPtr& head){
 
     string fline;
     ifstream fCountyPop;
-    fCountyPop.open("county-pop.txt");
+    fCountyPop.open(filename);
 
     while(!fCountyPop.eof()){
 
@@ -229,6 +232,63 @@ void DisplayList(PersonPtr head){
              << current->height << " | " << current->weight << " | "
              << current->fSSN << " | "  << current->mSSN << " | " <<  endl;
         current = current->next;
+    }
+}
+
+float CalcBMI(float height, float weight){
+    return (weight / (height * height)) * 703;
+}
+
+void DisplayHighBMI(PersonPtr head){
+
+    // Counts the persons in the list with high BMIs
+    int pcount;
+    PersonPtr current = head;
+
+    while(current != NULL){
+        if(CalcBMI(current->height, current->weight) > 27){
+            pcount++;
+            current = current->next;
+        }
+        else
+            current = current->next;
+    }
+    current = head;
+
+    // Creates a person array to store those with high BMIs
+    person personary[pcount];
+    int i = 0;
+
+    while(current != NULL){
+        if(CalcBMI(current->height, current->weight) > 27){
+            personary[i] = *current;
+            i++;
+            current = current->next;
+        }
+        else
+            current = current->next;
+    }
+    current = head;
+
+    // Sorts the person array into ascending order
+    person tmp;
+    for(int i = 0; i < pcount; i++){
+        for(int x = 1; x < pcount; x++){
+            if(CalcBMI(personary[x].height, personary[x].weight) < CalcBMI(personary[x - 1].height, personary[x - 1].weight)){
+                tmp = personary[x];
+                personary[x] = personary[x - 1];
+                personary[x - 1] = tmp;
+            }
+        }
+    }
+
+    // Displays the person array
+    cout << "List of those at high risk of cardiovascular disease: " << endl;
+    for(int x = 0; x < pcount; x++){
+        cout << personary[x].pName << " BMI: "
+             << CalcBMI(personary[x].height, personary[x].weight)
+             << endl;
+
     }
 }
 
