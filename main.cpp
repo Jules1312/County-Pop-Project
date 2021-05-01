@@ -1,6 +1,4 @@
-// Group project
-// 4/28/2021
-// Github test
+// It is a project!
 
 #include <iostream>
 #include <fstream>
@@ -33,6 +31,10 @@ void DisplayMenu();
 void InitializeList(PersonPtr&, string);
 void DisplayList(PersonPtr);
 void DisplayHighBMI(PersonPtr);
+void RemovePerson(PersonPtr&, long);
+void AddPersonsFromFile(PersonPtr&, string);
+void AddPersonFromUser(PersonPtr&);
+void EditPerson(PersonPtr, long) ;
 float CalcBMI(float, float);
 
 int main(){
@@ -46,30 +48,40 @@ int main(){
 
     bool isrunning = true;
     int userin;
+    long inputSSN ;
+    string inputFilename ;
+    
     while(isrunning == true){
-        cout << "Enter which menu item you would like(1, 2, 3 || 0 to quit): ";
+        cout << "Enter which menu item you would like(1, 2, 3 || 0 to quit and 13 to see the menu again): ";
         cin >> userin;
 
         switch(userin){
+            case 0 :
+                cout << endl << "Goodbye.";
+                isrunning = false;
+                break ;
             case 1 :
                 cout << endl;
                 DisplayList(head);
                 break;
             case 2 :
-                cout << endl;
-                TestFunction();
+                cout << endl << "Please enter the SSN of the person you would like to delete: " ;
+                cin >> inputSSN ;
+                RemovePerson(head, inputSSN);
                 break;
             case 3 :
-                cout << endl;
-                TestFunction();
+                cout << endl ;
+                AddPersonFromUser(head) ;
                 break;
             case 4 :
-                cout << endl;
-                TestFunction();
+                cout << endl << "Please enter the file name: " ;
+                cin >> inputFilename ;
+                AddPersonsFromFile(head, inputFilename);
                 break;
             case 5 :
-                cout << endl;
-                TestFunction();
+                cout << endl << "Please enter the SSN of the person you would like to edit: ";
+                cin >> inputSSN ;
+                EditPerson(head, inputSSN) ;
                 break;
             case 6 :
                 cout << endl;
@@ -99,29 +111,34 @@ int main(){
                 cout << endl;
                 TestFunction();
                 break;
+            case 13 :
+                cout << endl ;
+                DisplayMenu() ;
+                break ;
             default :
-                cout << "Goodbye.";
-                isrunning = false;
+                cout << endl << "That is not a valid menu option. Please try again." << endl ;
         }
         cout << endl;
     }
+    return 0 ;
 }
 
 void DisplayMenu(){
 
     cout << "Menu:" << endl
-    << "1. Display the list of county residents" << endl
-    << "2. Remove a person" << endl
-    << "3. Add a person" << endl
+    << "0. To quit." << endl
+    << "1. Display the list of people in order of ascending SSN" << endl
+    << "2. Remove a person from the list" << endl
+    << "3. Add a person to the list" << endl
     << "4. Add people to the list in bulk by reading a supplementary file containing person data" << endl
-    << "5. Edit a person (user specifies one SSN and enters new details of pname, height and weight for that SSN)" << endl
+    << "5. Edit a person (you specify one SSN and enter new details for pname, height and weight)" << endl
     << "6. Display all persons eligible for social security (age 65 and older)" << endl
     << "7. Display all persons at high risk of cardiovascular disease (BMI 27 and higher)" << endl
-    << "8. Display the male:female ratio of the population of the county (females per thousand males)" << endl
-    << "9. Find the parents of a person (user supplies SSN of the person)" << endl
-    << "10. Find all children of a person (user supplies SSN of the person)" << endl
-    << "11. Find all siblings of a person (user supplies SSN of the person)" << endl
-    << "12. Find all uncles, aunts, cousins, nephews and nieces of a person (user supplies SSN of the person)" << endl;
+    << "8. Display the male:female ratio of the people in the list" << endl
+    << "9. Find the parents of a person (you supply SSN of the person)" << endl
+    << "10. Find all children of a person (you supply SSN of the person)" << endl
+    << "11. Find all siblings of a person (you supply SSN of the person)" << endl
+    << "12. Find all uncles, aunts, cousins, nephews and nieces of a person (you supply SSN of the person)" << endl;
 }
 
 void InitializeList(PersonPtr& head, string filename){
@@ -174,11 +191,7 @@ void InitializeList(PersonPtr& head, string filename){
     delete newPerson;
 
     current = head;
-}
-
-void DisplayList(PersonPtr head){
-
-    PersonPtr current = head;
+    
     PersonPtr future = NULL;
     PersonPtr past = current;
     PersonPtr temp = current;
@@ -220,8 +233,13 @@ void DisplayList(PersonPtr head){
         current = head;
         temp = temp->next;
     }
+    
+}
 
-    current = head;
+void DisplayList(PersonPtr head){
+
+    PersonPtr current = head;
+    
     cout << endl;
 
     // Displays a list of persons of indefinite size
@@ -232,6 +250,7 @@ void DisplayList(PersonPtr head){
              << current->fSSN << " | "  << current->mSSN << " | " <<  endl;
         current = current->next;
     }
+    current = head;
 }
 
 float CalcBMI(float height, float weight){
@@ -295,3 +314,288 @@ void TestFunction(){
 
     cout << "testing 1 2 3";
 }
+
+void RemovePerson(PersonPtr& head, long pSSN) {
+    
+    bool first = true ;
+    PersonPtr future ;
+    PersonPtr current = head ;
+    string retry ;
+    while (true) {
+        future = current -> next ;
+        if (future->pSSN == pSSN) {
+            if (future->next == NULL) {
+                current -> next = NULL ; // LAST 1/2/3 - remove 3 then 2 points to NULL
+                delete future ;
+                break ;
+            }
+            else {
+                current -> next = future -> next ; // MID 1/2/3 - remove 2 and then 1 points to 3
+                delete future ;
+                break ;
+            }
+        }
+        if ((current->pSSN == pSSN) && (first == true)) {
+            head = future ;
+            delete current ; // FIRST 1/2/3 - remove 1 and 2 becomes head
+            break ;
+        }
+        if (future->next == NULL) {
+            cin.ignore() ;
+            cout << "That is not a valid SSN. Please try again." ;
+            cout << endl << "SSN: " ;
+            getline(cin, retry) ; 
+            pSSN = stol(retry) ;
+            current = head ;
+        }
+        current = current -> next ;
+        first = false ;
+    }
+    
+    current = head ;
+    cout << endl ;
+    
+    while (current != NULL) { // better way to display data - not defined size
+        cout << current -> pName << " | " << current -> pSSN << " | " 
+                << current -> gender << " | " << current -> DOB << " | " 
+                << current -> height << " | " << current -> weight << " | " 
+                << current -> fSSN << " | "  << current -> mSSN << " | " <<  endl ;
+        current = current -> next ;
+    }
+    
+}
+
+void AddPersonsFromFile(PersonPtr& head, string ogFile){
+
+
+    PersonPtr current = head ;
+    PersonPtr newPerson = NULL ;
+    PersonPtr future = current -> next ;
+    string fLine ;
+    
+    ifstream fNew;
+    fNew.open(ogFile);
+    
+    while (!fNew.eof()) { 
+        
+        newPerson = new person ;
+        
+        getline( fNew, fLine) ; 
+        newPerson -> pName = fLine ;
+        getline( fNew, fLine) ; 
+        newPerson -> pSSN = stol(fLine) ;
+        getline( fNew, fLine) ; 
+        newPerson -> gender = fLine[0] ;
+        getline( fNew, fLine) ; 
+        newPerson -> DOB = fLine ;
+        getline( fNew, fLine) ; 
+        newPerson -> height = stof(fLine) ;
+        getline( fNew, fLine) ; 
+        newPerson -> weight = stof(fLine) ;
+        getline( fNew, fLine) ; 
+        newPerson -> fSSN = stol(fLine) ;
+        getline( fNew, fLine) ; 
+        newPerson -> mSSN = stol(fLine) ;
+        
+        bool first = true ;
+        bool loop = true ;
+        current = head ;
+        while (loop == true) {
+            future = current -> next ;
+            if (future == NULL) { // add userPerson to end of list
+                current -> next = newPerson ; // xxx/current/future/userPerson
+                newPerson -> next = NULL ;
+                loop = false ;
+            }
+            else { 
+                if (future->pSSN > newPerson->pSSN) {
+                    if (first == true) {
+                        if (current->pSSN > newPerson->pSSN) {
+                            head = newPerson ; // add userPerson to start of list - new head
+                            newPerson -> next = current ; // userPerson/current/future/xxx
+                            loop = false ;
+                        }
+                        else {
+                            current -> next = newPerson ; // put userPerson in between position 1 and 2
+                            newPerson -> next = future ;  // current/userPerson/future/xxx
+                            loop = false ;
+                        }   
+                    }
+                    else {  
+                        current -> next = newPerson ; // not the first pass but xxx/current/userPerson/future/xxx
+                        newPerson -> next = future ;
+                        loop = false ;
+                    }
+                }
+                else { 
+                    if (future->pSSN == newPerson->pSSN) { // idk how you can have the same SSN but whatever
+                        current -> next = newPerson ; // xx/5(Current)/5(UsPer)/future
+                        newPerson -> next = future ;
+                        loop = false ;
+                    }
+                current = current -> next ; // move down the list
+                }
+            }
+            first = false ;
+        }
+        
+        
+    }
+    fNew.close() ;
+    
+    current = head ;
+    cout << endl ;
+    while (current != NULL) { 
+        cout << current -> pName << " | " << current -> pSSN << " | " 
+                << current -> gender << " | " << current -> DOB << " | " 
+                << current -> height << " | " << current -> weight << " | " 
+                << current -> fSSN << " | "  << current -> mSSN << " | " <<  endl ;
+        current = current -> next ;
+    }
+}
+
+void AddPersonFromUser(PersonPtr& head) {
+    
+    PersonPtr current = head ;
+    PersonPtr newPerson = NULL ;
+    PersonPtr future = current -> next ;
+    string fLine ;
+    PersonPtr userPerson = new person ;
+    
+    cin.ignore() ; // skips the name input without this
+    cout << "Please enter the information for the person you would like to add." << endl ;
+    cout << endl << "Name:" ;
+    getline(cin, fLine) ; 
+    userPerson -> pName = fLine ; 
+    cout << endl << "SSN: " ;
+    getline(cin, fLine) ; 
+    userPerson -> pSSN = stol(fLine) ;
+    cout << "Gender(M/F): " ;
+    getline(cin, fLine) ; 
+    userPerson -> gender = fLine[0] ;
+    cout << "Date of birth(YYYY/MM/DD): " ;
+    getline(cin, fLine) ; 
+    userPerson -> DOB = fLine ;
+    cout << "Height(in inches): " ;
+    getline(cin, fLine) ; 
+    userPerson -> height = stof(fLine) ;
+    cout << "Weight(in pounds): " ;
+    getline(cin, fLine) ; 
+    userPerson -> weight = stof(fLine) ;
+    cout << "Father's SSN: " ;
+    getline(cin, fLine) ; 
+    userPerson -> fSSN = stol(fLine) ;
+    cout << "Mother's SSN: " ;
+    getline(cin, fLine) ; 
+    userPerson -> mSSN = stol(fLine) ;
+    
+    bool first = true ;
+    while (future != NULL) {
+        future = current -> next ;
+        if (future == NULL) { // add userPerson to end of list
+            current -> next = userPerson ; // xxx/current/future/userPerson
+            userPerson -> next = NULL ;
+            break ;
+        }
+        else { 
+            if (future->pSSN > userPerson->pSSN) {
+                if (first == true) {
+                    if (current->pSSN > userPerson->pSSN) {
+                        head = userPerson ; // add userPerson to start of list - new head
+                        userPerson -> next = current ; // userPerson/current/future/xxx
+                        break ;
+                    }
+                    else {
+                    current -> next = userPerson ; // put userPerson in between position 1 and 2
+                    userPerson -> next = future ;  // current/userPerson/future/xxx
+                    break ;
+                    }
+                }
+                else {  
+                    current -> next = userPerson ; // not the first pass but xxx/current/userPerson/future/xxx
+                    userPerson -> next = future ;
+                    break ;
+                }
+            }
+            else { 
+                if (future->pSSN == userPerson->pSSN) { // idk how you can have the same SSN but whatever
+                    current -> next = userPerson ; // xx/5(Current)/5(UsPer)/future
+                    userPerson -> next = future ;
+                    break ;
+                }
+                current = current -> next ; // move down the list
+            }
+        }
+        first = false ;
+    }
+    current = head ;
+    cout << endl ;
+    
+    while (current != NULL) { 
+        cout << current -> pName << " | " << current -> pSSN << " | " 
+                << current -> gender << " | " << current -> DOB << " | " 
+                << current -> height << " | " << current -> weight << " | " 
+                << current -> fSSN << " | "  << current -> mSSN << " | " <<  endl ;
+        current = current -> next ;
+    }
+}
+
+void EditPerson(PersonPtr head, long inputSSN) {
+    
+    PersonPtr current = head ;
+    PersonPtr future = current -> next ;
+    string fLine ;
+    
+    while(current != NULL) {
+        if (inputSSN == current->pSSN) {
+            cout << endl << current -> pName << " | " << current -> pSSN << " | " 
+                << current -> gender << " | " << current -> DOB << " | " 
+                << current -> height << " | " << current -> weight << " | " 
+                << current -> fSSN << " | "  << current -> mSSN << " | " <<  endl ;
+            
+            cin.ignore() ;  
+            cout << endl << "Please enter the new name:" ;
+            getline(cin, fLine) ;
+            current -> pName = fLine ;
+            cout << endl << "Please enter the new height:" ;
+            getline(cin, fLine) ;
+            current -> height = stof(fLine) ;
+            cout << endl << "Please enter the new weight:" ;
+            getline(cin, fLine) ;
+            current -> weight = stof(fLine) ;
+            
+            cout << endl << endl << "Updated person to:" << endl ;
+            cout << current -> pName << " | " << current -> pSSN << " | " 
+                << current -> gender << " | " << current -> DOB << " | " 
+                << current -> height << " | " << current -> weight << " | " 
+                << current -> fSSN << " | "  << current -> mSSN << " | " <<  endl ;
+            break ;
+        }
+        else {
+            current = current -> next ;
+        }
+        if (current == NULL) {
+            cout << endl << "SSN:" << inputSSN << " not found. Please try again." ;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
