@@ -3,11 +3,15 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <time.h>
 
 using namespace std;
 
 struct person;
 typedef person* PersonPtr;
+
+struct ages ;
+typedef ages* AgesPtr ;
 
 struct person{
 
@@ -26,22 +30,39 @@ struct person{
     PersonPtr next;
 };
 
+struct ages{
+    
+    long pSSN ;
+    string pName ;
+    float age ;
+    
+    AgesPtr next ;
+    AgesPtr prev ;
+    
+} ;
+
 void TestFunction();
 void DisplayMenu();
-void InitializeList(PersonPtr&, string);
-void DisplayList(PersonPtr);
+void InitializeList(PersonPtr&, string, AgesPtr&, AgesPtr&);
+void DisplayList(PersonPtr, AgesPtr, AgesPtr);
 void DisplayHighBMI(PersonPtr);
-void RemovePerson(PersonPtr&, long);
-void AddPersonsFromFile(PersonPtr&, string);
-void AddPersonFromUser(PersonPtr&);
+void RemovePerson(PersonPtr&, long, AgesPtr&, AgesPtr&);
+void RemoveAge(AgesPtr&, AgesPtr&, long) ;
+void AddPersonsFromFile(PersonPtr&, string, AgesPtr&, AgesPtr&);
+void AddPersonFromUser(PersonPtr&, AgesPtr&, AgesPtr&);
 void EditPerson(PersonPtr, long) ;
 float CalcBMI(float, float);
+float get_age(string) ;
+void buildAgeList(AgesPtr&, AgesPtr&, float, string, long) ;
 
 int main(){
-
-    PersonPtr head;
+    
+    AgesPtr agesHead = NULL ;
+    AgesPtr agesEND = NULL ;
+    
+    PersonPtr head = NULL ;
     string filename = "county-pop.txt";
-    InitializeList(head, filename);
+    InitializeList(head, filename, agesHead, agesEND);
 
     cout << "County-Pop-Project" << endl << endl;
     DisplayMenu();
@@ -62,21 +83,21 @@ int main(){
                 break ;
             case 1 :
                 cout << endl;
-                DisplayList(head);
+                DisplayList(head, agesHead, agesEND);
                 break;
             case 2 :
                 cout << endl << "Please enter the SSN of the person you would like to delete: " ;
                 cin >> inputSSN ;
-                RemovePerson(head, inputSSN);
+                RemovePerson(head, inputSSN, agesHead, agesEND);
                 break;
             case 3 :
                 cout << endl ;
-                AddPersonFromUser(head) ;
+                AddPersonFromUser(head, agesHead, agesEND) ;
                 break;
             case 4 :
                 cout << endl << "Please enter the file name: " ;
                 cin >> inputFilename ;
-                AddPersonsFromFile(head, inputFilename);
+                AddPersonsFromFile(head, inputFilename, agesHead, agesEND);
                 break;
             case 5 :
                 cout << endl << "Please enter the SSN of the person you would like to edit: ";
@@ -141,54 +162,54 @@ void DisplayMenu(){
     << "12. Find all uncles, aunts, cousins, nephews and nieces of a person (you supply SSN of the person)" << endl;
 }
 
-void InitializeList(PersonPtr& head, string filename){
+void InitializeList(PersonPtr& head, string filename, AgesPtr& agesHead, AgesPtr& agesEND){
     /* This function initializes the list of
        residents from a file at the start of the program */
 
-    head = new person;
-    head->next = NULL;
-    PersonPtr current = head;
-    PersonPtr newPerson;
+    PersonPtr current = NULL ;
+    PersonPtr newPerson = NULL ;
 
     string fline;
     ifstream fCountyPop;
     fCountyPop.open(filename);
 
     while(!fCountyPop.eof()){
+        
+        newPerson = new person ;
 
         getline(fCountyPop, fline);
-        current->pName = fline;
+        newPerson->pName = fline;
         getline(fCountyPop, fline);
-        current->pSSN = stol(fline);
+        newPerson->pSSN = stol(fline);
         getline(fCountyPop, fline);
-        current->gender = fline[0];
+        newPerson->gender = fline[0];
         getline(fCountyPop, fline);
-        current->DOB = fline;
+        newPerson->DOB = fline;
         getline(fCountyPop, fline);
-        current->height = stof(fline);
+        newPerson->height = stof(fline);
         getline(fCountyPop, fline);
-        current->weight = stof(fline);
+        newPerson->weight = stof(fline);
         getline(fCountyPop, fline);
-        current->fSSN = stol(fline);
+        newPerson->fSSN = stol(fline);
         getline(fCountyPop, fline);
-        current->mSSN = stol(fline);
+        newPerson->mSSN = stol(fline);
+        
+        
 
-        newPerson = new person; // independent person
-        current->next = newPerson; // linking persons
-        current = newPerson;
+        newPerson -> next = NULL ;
+        
+        if (head == NULL) {
+            head = newPerson ;
+            current = newPerson ;
+            buildAgeList(agesHead, agesEND, get_age(newPerson->DOB + " 00:00:00"), newPerson->pName, newPerson->pSSN) ;
+        }
+        else {
+            current -> next = newPerson ;
+            current = newPerson ;
+            buildAgeList(agesHead, agesEND, get_age(newPerson->DOB + " 00:00:00"), newPerson->pName, newPerson->pSSN) ;
+        }
     }
     fCountyPop.close();
-
-    current = head;
-    person* prevPerson;
-
-    while (current->next != NULL){
-        prevPerson = current;
-        current = current->next;
-    }
-
-    prevPerson->next = NULL;
-    delete newPerson;
 
     current = head;
     
@@ -236,7 +257,7 @@ void InitializeList(PersonPtr& head, string filename){
     
 }
 
-void DisplayList(PersonPtr head){
+void DisplayList(PersonPtr head, AgesPtr agesHead, AgesPtr agesEND){
 
     PersonPtr current = head;
     
@@ -251,6 +272,23 @@ void DisplayList(PersonPtr head){
         current = current->next;
     }
     current = head;
+    
+    
+    AgesPtr currentAge = agesHead ;
+    
+    while(currentAge != NULL){
+        cout << currentAge->age << " | " << currentAge->pSSN << " | "
+             << currentAge->pName << " | " <<  endl;
+        currentAge = currentAge->next;
+    }
+    
+    currentAge = agesEND ;
+    
+    while(currentAge != NULL){
+        cout << currentAge->age << " | " << currentAge->pSSN << " | "
+             << currentAge->pName << " | " <<  endl;
+        currentAge = currentAge->prev;
+    }
 }
 
 float CalcBMI(float height, float weight){
@@ -315,7 +353,7 @@ void TestFunction(){
     cout << "testing 1 2 3";
 }
 
-void RemovePerson(PersonPtr& head, long pSSN) {
+void RemovePerson(PersonPtr& head, long pSSN, AgesPtr& agesHead, AgesPtr& agesEND) {
     
     bool first = true ;
     PersonPtr future ;
@@ -352,6 +390,8 @@ void RemovePerson(PersonPtr& head, long pSSN) {
         first = false ;
     }
     
+    RemoveAge(agesHead, agesEND, pSSN) ; // remove the person from the age linked list too
+    
     current = head ;
     cout << endl ;
     
@@ -365,7 +405,7 @@ void RemovePerson(PersonPtr& head, long pSSN) {
     
 }
 
-void AddPersonsFromFile(PersonPtr& head, string ogFile){
+void AddPersonsFromFile(PersonPtr& head, string ogFile, AgesPtr& agesHead, AgesPtr& agesEND){
 
 
     PersonPtr current = head ;
@@ -396,6 +436,8 @@ void AddPersonsFromFile(PersonPtr& head, string ogFile){
         newPerson -> fSSN = stol(fLine) ;
         getline( fNew, fLine) ; 
         newPerson -> mSSN = stol(fLine) ;
+        
+        buildAgeList(agesHead, agesEND, get_age(newPerson->DOB + " 00:00:00"), newPerson->pName, newPerson->pSSN) ;
         
         bool first = true ;
         bool loop = true ;
@@ -454,7 +496,7 @@ void AddPersonsFromFile(PersonPtr& head, string ogFile){
     }
 }
 
-void AddPersonFromUser(PersonPtr& head) {
+void AddPersonFromUser(PersonPtr& head, AgesPtr& agesHead, AgesPtr& agesEND) {
     
     PersonPtr current = head ;
     PersonPtr newPerson = NULL ;
@@ -488,6 +530,8 @@ void AddPersonFromUser(PersonPtr& head) {
     cout << "Mother's SSN: " ;
     getline(cin, fLine) ; 
     userPerson -> mSSN = stol(fLine) ;
+    
+    buildAgeList(agesHead, agesEND, get_age(userPerson->DOB + " 00:00:00"), userPerson->pName, userPerson->pSSN) ;
     
     bool first = true ;
     while (future != NULL) {
@@ -580,7 +624,119 @@ void EditPerson(PersonPtr head, long inputSSN) {
     }
 }
 
+float get_age(string strDOB) {
+    
+    time_t tDOB ;
+    int yy, month, dd, hh, mm, ss ;
+    struct tm tBase ;
+    
+    const char *zStart = strDOB.c_str() ;
+    
+    sscanf(zStart, "%d/%d/%d %d:%d:%d", &yy, &month, &dd, &hh, &mm, &ss) ;
+    
+    tBase.tm_year = yy - 1900 ;
+    tBase.tm_mon = mm - 1 ;
+    tBase.tm_mday = dd ;
+    tBase.tm_hour = hh ;
+    tBase.tm_min = mm ;
+    tBase.tm_sec = ss ;
+    tBase.tm_isdst = -1 ;
+    
+    tDOB = mktime(&tBase) ;
+    
+    time_t tCurrent ;
+    time(&tCurrent) ;
+    
+    long seconds = difftime(tCurrent, tDOB) ;
+    float years = float(seconds) / (365.0 * 24.0 * 3600.0) ;
+    
+    return years ;
+}
 
+void buildAgeList(AgesPtr& agesHead, AgesPtr& agesEND, float age, string pName, long pSSN) {
+    
+    AgesPtr newAger = new ages ;
+    
+    newAger -> pName = pName ;
+    newAger -> pSSN = pSSN ;
+    newAger -> age = age ;
+    newAger -> next = NULL ;
+    newAger -> prev = NULL ;
+    
+    if (agesHead == NULL) {
+        agesHead = newAger ; // first age in list so it is first and last
+        agesEND = newAger ;
+        return ;
+    }
+    AgesPtr current = agesHead ;
+    AgesPtr past = current ;
+    AgesPtr future = NULL ;
+    
+    if (newAger->age > current->age) { // only deals with first 2 in the list
+        agesHead = newAger ; // if it is larger than the first/head then it becomes it
+        newAger -> next = current ; // 3/2  3 now points to 2
+        current -> prev = newAger ; // 3/2  2 now points back to 3
+        return ;
+    }
+    else {
+        while (current != NULL) { // not position 1 or 2? Lets find where it goes
+        
+            future = current -> next ;
+            if (newAger->age > current->age) { // list == 4/*3/2/1   3 == newAger  2 == current
+                past -> next = newAger ; // 4 points to 3
+                newAger -> prev = past ; // 3 points back to 4
+                newAger -> next = current ; // 3 points to 2
+                current -> prev = newAger ; // 2 points back to 3    now it is 4 <-> 3 <-> 2
+                return ;
+            }
+            else {
+                if (future == NULL) { // you are on the last age in the list
+                    current -> next = newAger ; // 2 points to 1   4/3/2/*1*  2 == current   1 == newAger
+                    newAger -> prev = current ; // 1 points back to 2
+                    agesEND = newAger ; // set 1 to the end so we can find it 
+                    return ;
+                }
+            }
+            past = current ;
+            current = current -> next ; // keep the loop goin
+        }
+        
+    }
+}
+void RemoveAge(AgesPtr& agesHead, AgesPtr& agesEND, long pSSN) {
+    
+    AgesPtr current = agesHead ;
+    AgesPtr future ;
+    AgesPtr temp ;
+    bool first = true ;
+    
+    while (true) {
+        future = current -> next ;
+        if (future->pSSN == pSSN) { 
+            if (future->next == NULL) { //end so 4/3/2/1 remove 1
+                current -> next = NULL ; // 2 points to NULL
+                agesEND = current ; // set the end to 2 
+                delete future ; // delete 1
+                return ;
+            }
+            else {  // 4/3/2/1 delete 2
+                current -> next = future -> next ; // 3 points to 1
+                temp = future -> next ;  // temp == 1
+                temp -> prev = current ; // so 1 points back to 3
+                delete future ; // delete 2
+                return ;
+            }
+        }
+        if ((current->pSSN == pSSN) && (first == true)) { // 4/3/2/1 delete 4
+            agesHead = future ; // new head is 3
+            future -> prev = NULL ; // head prev set to NULL
+            delete current ; // delete 4
+            return ;
+        }
+        current = current -> next ;
+        first = false ;
+    }
+}
 
 
 
