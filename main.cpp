@@ -272,8 +272,7 @@ void DisplayList(PersonPtr head, AgesPtr agesHead, AgesPtr agesEND){
         current = current->next;
     }
     current = head;
-    
-    
+   
     AgesPtr currentAge = agesHead ;
     
     while(currentAge != NULL){
