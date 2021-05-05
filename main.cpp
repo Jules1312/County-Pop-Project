@@ -57,6 +57,7 @@ void buildAgeList(AgesPtr&, AgesPtr&, float, string, long) ;
 void DisplaySSPeople(AgesPtr) ;
 long* FindChildren(PersonPtr, long, int&) ; 
 void DisplayChildren(long*, int&, AgesPtr, long) ;
+void DisplayMFRatio(PersonPtr);
 
 int main(){
     
@@ -118,7 +119,7 @@ int main(){
                 break;
             case 8 :
                 cout << endl;
-                TestFunction();
+                DisplayMFRatio(head);
                 break;
             case 9 :
                 cout << endl;
@@ -865,17 +866,38 @@ void DisplayChildren(long* childrenArray, int &arraySize, AgesPtr agesHead, long
     delete[] childrenArray ;
 }
 
+void DisplayMFRatio(PersonPtr head){
 
+    int mcounter = 0;
+    int fcounter = 0;
+    int ocounter = 0;
 
+    PersonPtr current = head;
 
+    while(current != NULL){
+        switch(current->gender){
+            case 'M' :
+                mcounter++;
+                break;
+            case 'F' :
+                fcounter++;
+                break;
+            default :
+                ocounter++;
+                break;
+        }
+        current = current->next;
+    }
 
+    while((mcounter % 2) != 1){
+        mcounter = mcounter / 2;
+    }
+    while((fcounter % 2) != 1){
+        fcounter = fcounter / 2;
+    }
 
-
-
-
-
-
-
-
-
-
+    cout << "The male:female ratio of the county is " << mcounter << ":" << fcounter;
+    if(ocounter > 0){
+        cout << endl << "and there are " << ocounter << " individuals of other genders";
+    }
+}
