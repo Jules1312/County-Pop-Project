@@ -58,6 +58,7 @@ void DisplaySSPeople(AgesPtr) ;
 long* FindChildren(PersonPtr, long, int&) ; 
 void DisplayChildren(long*, int&, AgesPtr, long) ;
 void DisplayMFRatio(PersonPtr);
+void DisplayParents(PersonPtr, long);
 
 int main(){
     
@@ -122,8 +123,9 @@ int main(){
                 DisplayMFRatio(head);
                 break;
             case 9 :
-                cout << endl;
-                TestFunction();
+                cout << endl << "Please enter the SSN of the person whos parents you want to find: ";
+                cin >> inputSSN;
+                DisplayParents(head, inputSSN);
                 break;
             case 10 :
                 cout << endl << "Find the children of which person? Please enter their SSN: " ;
@@ -900,4 +902,36 @@ void DisplayMFRatio(PersonPtr head){
     if(ocounter > 0){
         cout << endl << "and there are " << ocounter << " individuals of other genders";
     }
+}
+
+void DisplayParents(PersonPtr head, long uSSN){
+
+    PersonPtr current = head;
+    string pName, fName, mName;
+    long fSSN, mSSN;
+
+    while(current != NULL){
+
+        if(current->pSSN == uSSN){
+            pName = current->pName;
+            fSSN = current->fSSN;
+            mSSN = current->mSSN;
+        }
+        current = current->next;
+    }
+    current = head;
+
+    while(current != NULL){
+        if(current->pSSN == fSSN)
+            fName = current->pName;
+        current->next;
+    }
+    while(current != NULL){
+        if(current->pSSN == mSSN)
+            mName = current->pName;
+        current->next;
+    }
+
+    cout << pName << "'s mother is " << mName
+    << " and their father is " << fName;
 }
