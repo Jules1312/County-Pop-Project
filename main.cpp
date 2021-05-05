@@ -274,17 +274,17 @@ void DisplayList(PersonPtr head, AgesPtr agesHead, AgesPtr agesEND){
         current = current->next;
     }
     current = head;
-    
+
     AgesPtr currentAge = agesHead ;
-    
+
     while(currentAge != NULL){
         cout << currentAge->age << " | " << currentAge->pSSN << " | "
              << currentAge->pName << " | " <<  endl;
         currentAge = currentAge->next;
     }
-    
+
     currentAge = agesEND ;
-    
+
     while(currentAge != NULL){
         cout << currentAge->age << " | " << currentAge->pSSN << " | "
              << currentAge->pName << " | " <<  endl;
@@ -308,8 +308,6 @@ void DisplayHighBMI(PersonPtr head){
        current = current->next;
     }
     current = head;
-
-    cout << pcount;
 
     // Creates a person array to store those with high BMIs
     person personary[pcount];
@@ -785,20 +783,3 @@ void DisplayEligibleSS(AgesPtr agesEND){
         current = current->prev;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
