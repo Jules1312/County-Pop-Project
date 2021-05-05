@@ -55,9 +55,14 @@ float CalcBMI(float, float);
 float get_age(string) ;
 void buildAgeList(AgesPtr&, AgesPtr&, float, string, long) ;
 void DisplaySSPeople(AgesPtr) ;
-long* FindChildren(PersonPtr, long, int&) ; 
+long* FindChildren(PersonPtr, long, int&) ; //returns pointer array
 void DisplayChildren(long*, int&, AgesPtr, long) ;
 void DisplayMFRatio(PersonPtr);
+long* FindParents(PersonPtr, long, int&, bool) ; //returns pointer array
+void FindingWholeFam(PersonPtr, AgesPtr) ;
+long* FindSiblings(PersonPtr, long, int&) ; //returns pointer array
+void DisplaySiblings(long*, int&, AgesPtr, long) ;
+
 
 int main(){
     
@@ -71,14 +76,15 @@ int main(){
     cout << "County-Pop-Project" << endl << endl;
     DisplayMenu();
 
-    bool isrunning = true;
-    int userin;
-    long inputSSN ;
-    string inputFilename ;
-    int arraySize = 0 ;
+    bool isrunning = true; // running switch/menu
+    int userin; // running switch/menu
+    long inputSSN ; // user input
+    string inputFilename ; // for 4
+    int arraySize = 0 ; // for 9/10/11/12
+    bool display ; // for 9
     
     while(isrunning == true){
-        cout << "Enter which menu item you would like(1, 2, 3 || 0 to quit and 13 to see the menu again): ";
+        cout << endl << "Enter which menu item you would like(1, 2, 3 || 0 to quit and 13 to see the menu again): ";
         cin >> userin;
 
         switch(userin){
@@ -122,8 +128,12 @@ int main(){
                 DisplayMFRatio(head);
                 break;
             case 9 :
-                cout << endl;
-                TestFunction();
+                display = true ; // so the function couts
+                cout << endl << "Find the parents of which person? Please enter their SSN: " ;
+                cin >> inputSSN ;
+                FindParents(head, inputSSN, arraySize, display) ;
+                //delete[] parentArray ; // free up memory
+                display = false ; // so we can use the function in 12 with no cout
                 break;
             case 10 :
                 cout << endl << "Find the children of which person? Please enter their SSN: " ;
@@ -131,12 +141,13 @@ int main(){
                 DisplayChildren(FindChildren(head, inputSSN, arraySize), arraySize, agesHead, inputSSN) ;
                 break;
             case 11 :
-                cout << endl;
-                TestFunction();
+                cout << endl << "Find the siblings of which person? Please enter their SSN: " ;
+                cin >> inputSSN ;
+                DisplaySiblings(FindSiblings(head, inputSSN, arraySize), arraySize, agesHead, inputSSN) ;
                 break;
             case 12 :
                 cout << endl;
-                TestFunction();
+                //FindingWholeFam(PersonPtr, AgesPtr) ;
                 break;
             case 13 :
                 cout << endl ;
@@ -866,11 +877,216 @@ void DisplayChildren(long* childrenArray, int &arraySize, AgesPtr agesHead, long
     delete[] childrenArray ;
 }
 
+long* FindSiblings(PersonPtr head, long inputSSN, int &arraySize) {
+    
+    PersonPtr current = head ;
+    PersonPtr foundThem ;
+    long mInputSSN ;
+    long fInputSSN ;
+    arraySize = 0 ;
+    
+    while (current != NULL) { // find the person for name 
+        if (current->pSSN == inputSSN) {
+            foundThem = current ;
+            break ;
+        }
+        current = current -> next ;
+        if (current == NULL) {
+            cin.ignore() ;
+            cout << inputSSN << " was not found. Please enter a new SSN: " ;
+            cin >> inputSSN ;
+            current = head ;
+        }
+        
+    }
+    
+     // getting parents SSN from inputSSN
+    mInputSSN = foundThem -> mSSN ;
+    fInputSSN = foundThem -> fSSN ;
+    
+    current = head ;
+    
+    while (current != NULL) { // just counting the people so we can make the array
+        if (current->pSSN != foundThem->pSSN) {
+            if ((current->mSSN == mInputSSN) || (current->fSSN == fInputSSN)) {
+                arraySize++ ;
+                
+            }
+        }     
+                
+        current = current -> next ;
+        
+    }
+    
+    long* siblingArray = new long[arraySize] ; // array to hold the SSN's of all the siblings
+    current = head ;
+    int i = 0 ;
+    
+    while (current != NULL) { // first loop to put shared mother in array
+        if (current->pSSN != foundThem->pSSN) { // dont want to output the input
+            if (current->mSSN == mInputSSN) {
+                siblingArray[i] = current -> pSSN  ;
+                i++ ;
+            }   
+        }
+        current = current -> next ;
+    }
+    current = head ;
+    while (current != NULL) { // 2nd loop to put shared father in array
+        if (current->pSSN != foundThem->pSSN) { // dont want to output the input
+            if (current->fSSN == fInputSSN) {
+                siblingArray[i] = current -> pSSN  ;
+                i++ ;
+            }   
+        }
+        current = current -> next ;
+    }
+    
+    return siblingArray ;
+}
+
+void DisplaySiblings(long* siblingArray, int &arraySize, AgesPtr agesHead, long inputSSN){
+    
+    AgesPtr current = agesHead ;
+    
+    if (arraySize == 0) {
+        delete[] siblingArray ; // free up memory
+        cout << endl << "SSN:" << inputSSN << " has no siblings in the file." << endl ;
+        return ; //we done here
+    }
+    
+    cout << endl << endl << "Here are the siblings:" << endl << endl ;
+    
+    while (current != NULL) {
+        
+        for (int i = 0; i < arraySize; i++) { // comparing siblings to struct
+            if (current->pSSN == siblingArray[i]) {
+                cout << current -> pName << " | " << current -> pSSN 
+                    << " | Age:" << current -> age << endl ;
+            }  
+        }
+        current = current -> next ;
+    }
+    
+    //delete[] siblingArray ;
+}
+
+long* FindParents(PersonPtr head, long inputSSN, int &arraySize, bool display) { 
+    
+    PersonPtr current = head ;
+    PersonPtr foundThem ;
+    long mInputSSN ;
+    long fInputSSN ;
+    arraySize = 0 ;
+    
+    while (current != NULL) { // find the person for name 
+        if (current->pSSN == inputSSN) {
+            foundThem = current ;
+            break ;
+        }
+        current = current -> next ;
+        if (current == NULL) {
+            cin.ignore() ;
+            cout << inputSSN << " was not found. Please enter a new SSN: " ;
+            cin >> inputSSN ;
+            current = head ;
+        }
+        
+    }
+    
+    foundThem -> mSSN = mInputSSN ; // getting parents SSN from inputSSN
+    foundThem -> fSSN = fInputSSN ;
+    
+    current = head ;
+    while (current != NULL) { // just counting the parents so we can make the array
+        if ((current->pSSN == mInputSSN) || (current->pSSN == fInputSSN)) {
+            arraySize++ ;
+        }
+        current = current -> next ;
+    }
+    
+    // array is dynamic so it will exist outside of the function
+    long* parentArray = new long[arraySize] ; // array to hold the SSN's of the parents
+    int i = 0 ;
+    int mCount = 0 ;
+    int fCount = 0 ;
+    current = head ;
+    
+    while (current != NULL) { // first loop to put mother/s in first spot in array
+        
+        if (current->pSSN == mInputSSN) {
+            parentArray[i] = current -> pSSN  ;
+            i++ ;
+            mCount++ ;
+        }
+            
+        current = current -> next ;
+    }
+    current = head ;
+    while (current != NULL) { // second loop to put in father/s
+        
+        if (current->pSSN == fInputSSN) {
+            parentArray[i] = current -> pSSN  ;
+            i++ ;
+            fCount++ ;
+        }
+            
+        current = current -> next ;
+    }
+    
+    current = head ;
+    i = 0 ;
+    if (display == true) { // cout only if we want to
+        if (arraySize == 0) {
+            cout << endl << foundThem->pName << "'s parents are not in the file." << endl ;
+        }
+        else {
+            if (mCount == 0) {
+                cout << endl << foundThem->pName << "'s mother is not in the file." << endl ;
+            }
+            while (mCount > 0) {
+                cout << endl << "The mother/s: " ;
+                while (mCount > 0) {
+                    while (current != NULL) {
+                        if (current->pSSN == parentArray[i]) {
+                            cout << endl << current -> pName ;
+                            i++ ;
+                        }
+                        current = current -> next ;
+                    } 
+                    mCount-- ;
+                    current = head ;
+                }
+            }
+            if (fCount == 0) {
+                cout << endl << endl << foundThem->pName << "'s father is not in the file." << endl ;
+            }
+            while (fCount > 0) {
+                cout << endl << endl << "The father/s: " ;
+                while (fCount > 0) {
+                    while (current != NULL) {
+                        if (current->pSSN == parentArray[i]) {
+                            cout << endl << current -> pName ;
+                            i++ ;
+                        }
+                        current = current -> next ;
+                    } 
+                    fCount-- ;
+                    current = head ;
+                }
+            }
+        }
+    }
+    
+    return parentArray ;
+    
+}
+
 void DisplayMFRatio(PersonPtr head){
 
     int mcounter = 0;
     int fcounter = 0;
-    int ocounter = 0;
+    //int ocounter = 0;
 
     PersonPtr current = head;
 
@@ -883,21 +1099,91 @@ void DisplayMFRatio(PersonPtr head){
                 fcounter++;
                 break;
             default :
-                ocounter++;
-                break;
+                cout << endl << "Error! Someone's gender is not \"M\" or \"F\"" ;
+                return;
         }
         current = current->next;
     }
-
+    /*
+    for (int i = 9; i > 1; i--) { // 100 / 10 to 20 / 2 to 10 / 1
+        if ((mcounter % i) == 0) && (fcounter % i) == 0)) { //no remainder
+            mcounter = mcounter / i ;
+            fcounter = fcounter / i ;
+            i = 9 ;
+        }
+        
+    }
+    */
+    bool loop = true ;
+    bool mDivisable = false ;
+    bool fDivisable = false ;
+    int i = 9 ;
+    int mDivideCount = 0 ;
+    int fDivideCount = 0 ;
+    
+    while (loop) {
+        if (mDivideCount || (fcounter % i) == 0) {
+            if ((mcounter % i) == 0) { //no remainder
+                mDivisable = false ;
+                if ((mcounter / i) != 1){
+                    //mcounter = mcounter / i ;
+                    mDivisable = true ;
+                    i = 10 ;
+                }
+            }
+            if ((fcounter % i) == 0) { //no remainder
+                if ((fcounter / i) != 1){
+                    //fcounter = fcounter / i ;
+                    //divisable = true ;
+                    i = 10 ;
+                }
+            }
+        }
+        
+        i-- ;
+        if (i == 1) {
+            loop = false ;
+        }
+    }
+    /*
     while((mcounter % 2) != 1){
         mcounter = mcounter / 2;
     }
     while((fcounter % 2) != 1){
         fcounter = fcounter / 2;
     }
-
+*/
     cout << "The male:female ratio of the county is " << mcounter << ":" << fcounter;
-    if(ocounter > 0){
-        cout << endl << "and there are " << ocounter << " individuals of other genders";
+    //if(ocounter > 0){
+    //    cout << endl << "and there are " << ocounter << " individuals of other genders";
+    //}
+}
+
+void FindingWholeFam(PersonPtr head, AgesPtr head, long inputSSN, int &arraySize) {
+    
+    PersonPtr current = head ;
+    bool display = false ;
+    int parentsArraySize = 0 ;
+    int parSibArraySize = 0 ;
+    
+    
+    long* parSibArray ; // finding parents of input
+    long* parentsArray = FindParents(head, inputSSN, arraySize, display) ;
+    
+    parentsArraySize = arraySize ;
+    
+    for (int i = 0; i < parentsArraySize; i++) {
+        FindSiblings(head, parentsArray[i], arraySize) ;
+        parSibArraySize = parSibArraySize + arraySize ;
     }
+    
+    long* unclesAuntList = new long[parSibArraySize] ;
+    
+    for (int i = 0; i < parentsArraySize; i++) {
+        unclesAuntList = FindSiblings(head, parentsArray[i], arraySize) ;
+        
+    }
+    
+    
+    
 }
