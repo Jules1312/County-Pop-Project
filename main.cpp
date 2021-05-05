@@ -875,6 +875,7 @@ void DisplayMFRatio(PersonPtr head){
     int fcounter = 0;
     int ocounter = 0;
     int d;
+    float mfratio;
 
     PersonPtr current = head;
 
@@ -896,8 +897,9 @@ void DisplayMFRatio(PersonPtr head){
     d = __gcd(mcounter, fcounter);
     mcounter = mcounter / d;
     fcounter = fcounter / d;
+    mfratio = fcounter / mcounter;
 
-    cout << "The male:female ratio of the county is " << mcounter << ":" << fcounter;
+    cout << "The male:female ratio of the county is " << fcounter * mfratio << " females per 1000 males." << endl;
     if(ocounter > 0){
         cout << endl << "and there are " << ocounter << " individuals of other genders";
     }
