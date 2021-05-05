@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <time.h>
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -873,6 +874,7 @@ void DisplayMFRatio(PersonPtr head){
     int mcounter = 0;
     int fcounter = 0;
     int ocounter = 0;
+    int d;
 
     PersonPtr current = head;
 
@@ -891,12 +893,9 @@ void DisplayMFRatio(PersonPtr head){
         current = current->next;
     }
 
-    while((mcounter % 2) != 1){
-        mcounter = mcounter / 2;
-    }
-    while((fcounter % 2) != 1){
-        fcounter = fcounter / 2;
-    }
+    d = __gcd(mcounter, fcounter);
+    mcounter = mcounter / d;
+    fcounter = fcounter / d;
 
     cout << "The male:female ratio of the county is " << mcounter << ":" << fcounter;
     if(ocounter > 0){
