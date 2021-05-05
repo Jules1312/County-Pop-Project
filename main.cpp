@@ -54,6 +54,9 @@ void EditPerson(PersonPtr, long) ;
 float CalcBMI(float, float);
 float get_age(string) ;
 void buildAgeList(AgesPtr&, AgesPtr&, float, string, long) ;
+void DisplaySSPeople(AgesPtr) ;
+long* FindChildren(PersonPtr, long, int&) ; 
+void DisplayChildren(long*, int&, AgesPtr, long) ;
 
 int main(){
     
@@ -71,6 +74,7 @@ int main(){
     int userin;
     long inputSSN ;
     string inputFilename ;
+    int arraySize = 0 ;
     
     while(isrunning == true){
         cout << "Enter which menu item you would like(1, 2, 3 || 0 to quit and 13 to see the menu again): ";
@@ -106,7 +110,7 @@ int main(){
                 break;
             case 6 :
                 cout << endl;
-                TestFunction();
+                DisplaySSPeople(agesEND);
                 break;
             case 7 :
                 cout << endl;
@@ -121,8 +125,9 @@ int main(){
                 TestFunction();
                 break;
             case 10 :
-                cout << endl;
-                TestFunction();
+                cout << endl << "Find the children of which person? Please enter their SSN: " ;
+                cin >> inputSSN ;
+                DisplayChildren(FindChildren(head, inputSSN, arraySize), arraySize, agesHead, inputSSN) ;
                 break;
             case 11 :
                 cout << endl;
@@ -272,7 +277,8 @@ void DisplayList(PersonPtr head, AgesPtr agesHead, AgesPtr agesEND){
         current = current->next;
     }
     current = head;
-   
+    
+    
     AgesPtr currentAge = agesHead ;
     
     while(currentAge != NULL){
@@ -301,12 +307,18 @@ void DisplayHighBMI(PersonPtr head){
     PersonPtr current = head;
 
     while(current != NULL){
+        //cout << current->pName << "  " << CalcBMI(current->height, current->weight) << endl ;
         if(CalcBMI(current->height, current->weight) > 27){
             pcount++;
-            current = current->next;
+            //current = current->next;
+            cout << current->pName << " if" << endl ;
         }
-        else
-            current = current->next;
+        else {
+            //current = current->next;
+            //cout << current->pName << " else" << endl ;
+        }
+        current = current->next;
+        //cout << endl << current->pName << " this is current next at end of loop" ;
     }
     current = head;
 
@@ -316,19 +328,28 @@ void DisplayHighBMI(PersonPtr head){
 
     while(current != NULL){
         if(CalcBMI(current->height, current->weight) > 27){
-            personary[i] = *current;
+            cout << "i " << i ;
+            personary[i].pName = current->pName;
+            personary[i].height = current->height ;
+            personary[i].weight = current->weight ;
+            
+            cout << endl << current->pName << " 2nd loop" << endl ;
+            cout << personary[i].pName << endl ;
             i++;
-            current = current->next;
+            //current = current->next;
         }
-        else
-            current = current->next;
+        //else {
+           // current = current->next;
+        //}
+        current = current->next;
+        cout << endl << current << " current next" << endl ;
     }
     current = head;
-
+    cout << endl << "did we leave the loop?" ;
     // Sorts the person array into ascending order
     person tmp;
-    for(int i = 0; i < pcount; i++){
-        for(int x = 1; x < pcount; x++){
+    /*for(int i = 0; i < pcount; i++){
+        for(int x = 1; x < pcount; x++){ // 0 = 4    1 = 4
             if(CalcBMI(personary[x].height, personary[x].weight) < CalcBMI(personary[x - 1].height, personary[x - 1].weight)){
                 tmp = personary[x];
                 personary[x] = personary[x - 1];
@@ -336,7 +357,7 @@ void DisplayHighBMI(PersonPtr head){
             }
         }
     }
-
+*/
     // Displays the person array
     cout << "List of those at high risk of cardiovascular disease: " << endl;
     for(int x = 0; x < pcount; x++){
@@ -736,9 +757,113 @@ void RemoveAge(AgesPtr& agesHead, AgesPtr& agesEND, long pSSN) {
         first = false ;
     }
 }
+void DisplaySSPeople(AgesPtr agesEND) {
+    
+    AgesPtr currentAge = agesEND ;
+    
+    while (currentAge != NULL){
+        if (currentAge->age >= 65) {
+            cout << currentAge->pName << "'s age is " << currentAge->age 
+             << " and they are eligible for Social Security!" 
+             <<  endl ;
+        }
+        
+        currentAge = currentAge->prev;
+    }
+}
+long* FindChildren(PersonPtr head, long inputSSN, int &arraySize) {
+    
+    PersonPtr current = head ;
+    PersonPtr foundThem ;
+    bool male ;
+    arraySize = 0 ; // reset it for multiple runs
+     
+    
+    while (current != NULL) { // find the person to find gender
+        if (current->pSSN == inputSSN) {
+            foundThem = current ;
+            break ;
+        }
+        current = current -> next ;
+        if (current == NULL) {
+            cin.ignore() ;
+            cout << inputSSN << " was not found. Please enter a new SSN: " ;
+            cin >> inputSSN ;
+            current = head ;
+        }
+        
+    }
+    
+    if (foundThem->gender == 'M') {
+        male = true ;
+    }
+    else male = false ;
+    
+    current = head ;
+    while (current != NULL) { // just counting the children so we can make the array
+        if (male == true) { // look at fSSN of everyone cus he a daddy
+            if (current->fSSN == foundThem->pSSN) {
+                arraySize++ ;
+            }
+        }
+        else {// she a momma
+            if (current->mSSN == foundThem->pSSN) { 
+                arraySize++ ;
+            }
+        }
+        current = current -> next ;
+    }
+    
+    // array is dynamic so it will exist outside of the function
+    long* childrenArray = new long[arraySize] ; // array to hold the SSN's of all the children
+    int i = 0 ;
+    current = head ;
+    
+    while (current != NULL) { // now we are filling the array
+        if (male == true) { // look at fSSN of everyone cus he a daddy
+            if (current->fSSN == foundThem->pSSN) {
+                childrenArray[i] = current -> pSSN  ;
+                i++ ;
+            }
+        }
+        else {// she a momma
+            if (current->mSSN == foundThem->pSSN) { 
+                childrenArray[i] = current -> pSSN  ;
+                i++ ;
+            }
+        }
+        current = current -> next ;
+    }
+    
+    return childrenArray ;
+    
+    
+}
 
-
-
+void DisplayChildren(long* childrenArray, int &arraySize, AgesPtr agesHead, long inputSSN) {
+    
+    AgesPtr current = agesHead ;
+    
+    if (arraySize == 0) {
+        delete[] childrenArray ; // free up memory
+        cout << endl << "SSN:" << inputSSN << " has no children." << endl ;
+        return ; //we done here
+    }
+    
+    cout << endl << endl << "Here are the children:" << endl << endl ;
+    
+    while (current != NULL) {
+        for (int i = 0; i < arraySize; i++) { // compare all children to each current
+            if (current->pSSN == childrenArray[i]) {
+                cout << current -> pName << " | " << current -> pSSN 
+                    << " | Age:" << current -> age << endl ;
+            }  
+        }
+        current = current -> next ;
+    }
+    
+    delete[] childrenArray ;
+}
 
 
 
