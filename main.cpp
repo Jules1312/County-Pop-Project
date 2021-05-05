@@ -935,3 +935,15 @@ void DisplayParents(PersonPtr head, long uSSN){
     cout << pName << "'s mother is " << mName
     << " and their father is " << fName;
 }
+
+void DisplaySSPeople(AgesPtr agesEND){
+    AgesPtr currentAge = agesEND;
+    
+    while(currentAge != NULL){
+        if(currentAge->age >= 65){
+            cout << currentAge->pName << "'s age is:  " << currentAge->age
+                 << " and they are currently eligible for Social Security!"
+                 << endl;
+        }
+    }
+}
