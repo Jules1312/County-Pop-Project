@@ -1,4 +1,6 @@
-// It is a project!
+// Kyle Pitcher, Patrick Trinidad, Dave Blechman
+// 05/05/2021
+// Final county pop project
 
 #include <iostream>
 #include <fstream>
