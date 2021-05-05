@@ -291,23 +291,6 @@ void DisplayList(PersonPtr head, AgesPtr agesHead, AgesPtr agesEND){
         current = current->next;
     }
     current = head;
-    
-    
-    AgesPtr currentAge = agesHead ;
-    
-    while(currentAge != NULL){
-        cout << currentAge->age << " | " << currentAge->pSSN << " | "
-             << currentAge->pName << " | " <<  endl;
-        currentAge = currentAge->next;
-    }
-    
-    currentAge = agesEND ;
-    
-    while(currentAge != NULL){
-        cout << currentAge->age << " | " << currentAge->pSSN << " | "
-             << currentAge->pName << " | " <<  endl;
-        currentAge = currentAge->prev;
-    }
 }
 
 float CalcBMI(float height, float weight){
